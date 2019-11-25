@@ -98,7 +98,6 @@ exports.addUser = addUser;
  * @return {Promise<[{}]>} A promise to the reservations.
  */
 const getAllReservations = function(guest_id, limit = 10) {
-  // return getAllProperties(null, 2);
   const text = `SELECT properties.*, reservations.*, avg(rating) AS average_rating
   FROM reservations 
   INNER JOIN properties ON reservations.property_id = properties.id
@@ -108,11 +107,7 @@ const getAllReservations = function(guest_id, limit = 10) {
   GROUP BY properties.id, reservations.id
   ORDER BY reservations.start_date
   LIMIT $2;`;
-  const values = [guest_id, limit];
-
-  // console.log(text, values);
-  
-
+  const values = [guest_id, limit];  
   return pool.query(text, values)
     .then((res) => {
       return res.rows;
@@ -132,16 +127,15 @@ exports.getAllReservations = getAllReservations;
  * @return {Promise<[{}]>}  A promise to the properties.
  */
 const getAllProperties = function(options, limit = 10) {
-  // 1
+  
   const queryParams = [];
-  // 2
+  
   let queryString = `
   SELECT properties.*, avg(property_reviews.rating) as average_rating
   FROM properties
   JOIN property_reviews ON properties.id = property_id
   `;
 
-  // 3
   if (options.city) {
     queryParams.push(`%${options.city}%`);
     queryString += `WHERE city LIKE $${queryParams.length} `;
@@ -164,7 +158,6 @@ const getAllProperties = function(options, limit = 10) {
   } else {
     queryString += `GROUP BY properties.id`;
   }
-  // 4
 
   queryParams.push(limit);
   queryString += `
@@ -172,10 +165,6 @@ const getAllProperties = function(options, limit = 10) {
   LIMIT $${queryParams.length};
   `;
 
-  // 5
-  // console.log(queryString, queryParams);
-
-  // 6
   return pool.query(queryString, queryParams)
   .then(res => res.rows);
 };
@@ -187,6 +176,7 @@ exports.getAllProperties = getAllProperties;
  * @param {{}} property An object containing all of the property details.
  * @return {Promise<{}>} A promise to the property.
  */
+
 const addProperty = function (property) {
   let attributeString = '';
   let dollarString = '';
