@@ -187,48 +187,32 @@ exports.getAllProperties = getAllProperties;
  * @param {{}} property An object containing all of the property details.
  * @return {Promise<{}>} A promise to the property.
  */
-const addProperty = function(property) {
-  // 1
-  // const queryParams = [];
-  // 2
-  // let queryString = `
-  // INSERT INTO properties (owner_id, title, description, thumbnail_photo_url, cover_photo_url, cost_per_night, parking_spaces, number_of_bathrooms, number_of_bedrooms, country, street, city, province, post_code, active)
-  // VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)
-  // RETURNING *
-  // `;
-  // queryParams.push(property);
-  // queryString += 
-  //   `${property.owner_id}`,
-  //   `${property.title}`,
-  //   `${property.description}`,
-  //   `${property.thumbnail_photo_url}`,
-  //   `${property.cover_photo_url}`,
-  //   `${property.cost_per_night}`,
-  //   `${property.parking_spaces}`,
-  //   `${property.number_of_bathrooms}`,
-  //   `${property.number_of_bedrooms}`,
-  //   `${property.country}`,
-  //   `${property.street}`,
-  //   `${property.city}`,
-  //   `${property.province}`,
-  //   `${property.post_code}`,
-  //   `${property.active}`;
+const addProperty = function (property) {
+  let attributeString = '';
+  let dollarString = '';
+  let propertyValues = [];
+  for (let [key, value] of Object.entries(property)) {
+    if (value && key !== 'owner_id') {
+      attributeString += (key + ', ');
+      propertyValues.push(value);
+    } else if (value) {
+      attributeString += key;
+      propertyValues.push(value);
+    } else attributeString += '';
+  }
+  propertyValues.forEach((index) => {
+    if (index !== propertyValues.length - 1) dollarString += (`$${index + 1} ,`);
+    else dollarString += `$${index + 1}`;
+  });
 
-  //   console.log(queryString, queryParams);
-
-  // return pool.query(queryString, queryParams)
-  // .then(res => res.rows[0]
-  //   ).catch((error) => {
-  //     console.log(`Error is: ${error}`)
-  // })
-
-
-
-
-
-
-
-
-   };
+  const queryString = `
+    INSERT INTO properties (${attributeString})
+    VALUES (${dollarString})
+    RETURNING *;
+  `;
+  return db.pool.query(queryString, propertyValues)
+    .then(res => res.rows)
+    .catch(err => console.log(err));
+}
   
 exports.addProperty = addProperty;
